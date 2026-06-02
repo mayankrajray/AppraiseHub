@@ -3,9 +3,7 @@ package com.appraisehub.controller;
 import com.appraisehub.model.Employee;
 import com.appraisehub.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.batch.BatchTransactionManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
