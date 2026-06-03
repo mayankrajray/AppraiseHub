@@ -1,5 +1,6 @@
 package com.appraisehub.service.impl;
 
+import com.appraisehub.exception.ResourceNotFoundException;
 import com.appraisehub.model.Employee;
 import com.appraisehub.service.EmployeeService;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,9 @@ public class EmployeeServiceImpl implements EmployeeService {
                 return employee;
             }
         }
-        return null;
+        throw new ResourceNotFoundException(
+                "Employee not found with id: " + id
+        );
     }
 
     @Override
@@ -48,11 +51,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                 return emp;
             }
         }
-        return null;
+        throw new ResourceNotFoundException(
+                "Employee not found with id: " + id
+        );
     }
 
     @Override
     public void deleteEmployee(Integer id) {
-        employees.removeIf(employee -> employee.getId().equals(id));
+        Employee employee = getEmployeeById(id);
+        employees.removeIf(emp -> emp.getId().equals(id));
     }
 }

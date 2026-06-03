@@ -26,9 +26,6 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById (@PathVariable Integer id) {
         Employee employee = employeeService.getEmployeeById(id);
-        if(employee !=null){
-            return ResponseEntity.ok(employee);
-        }
         return ResponseEntity.notFound().build();
     }
 
@@ -41,10 +38,7 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Integer id, @RequestBody Employee employee){
         Employee updatedEmployee = employeeService.updateEmployee(id,employee);
-        if(updatedEmployee != null){
             return ResponseEntity.ok(updatedEmployee);
-        }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
