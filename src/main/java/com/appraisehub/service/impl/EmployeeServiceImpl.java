@@ -2,63 +2,52 @@ package com.appraisehub.service.impl;
 
 import com.appraisehub.exception.ResourceNotFoundException;
 import com.appraisehub.model.Employee;
+import com.appraisehub.repository.EmployeeRepository;
 import com.appraisehub.service.EmployeeService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private List<Employee> employees = new ArrayList<>();
-    private int idCounter = 1;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
 
     @Override
     public List<Employee> getAllEmployees() {
-        return employees;
+        return employeeRepository.findAll();
     }
 
     @Override
-    public Employee getEmployeeById(Integer id) {
-        for(Employee employee: employees){
-            if (employee.getId().equals(id)){
-                return employee;
-            }
-        }
-        throw new ResourceNotFoundException(
-                "Employee not found with id: " + id
-        );
+    public Employee getEmployeeById(Long id) {
+        return employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
     }
+
 
     @Override
     public Employee addEmployee(Employee employee) {
-        employee.setId(idCounter);
-        employees.add(employee);
-        idCounter++;
-        return employee;
+        return employeeRepository.save(employee);
     }
 
     @Override
-    public Employee updateEmployee(Integer id, Employee employee) {
-        for (Employee emp : employees) {
-            if (emp.getId().equals(id)) {
-                emp.setName(employee.getName());
-                emp.setEmail(employee.getEmail());
-                emp.setDepartment(employee.getDepartment());
-                emp.setRole(employee.getRole());
-                return emp;
-            }
-        }
-        throw new ResourceNotFoundException(
-                "Employee not found with id: " + id
-        );
+    public Employee updateEmployee(Long id, Employee employee) {
+        Employee existingEmployee = employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+
+        existingEmployee.setName(employee.getName());
+        existingEmployee.setEmail(employee.getEmail());
+        existingEmployee.setDepartment(employee.getDepartment());
+        existingEmployee.setRole(employee.getRole());
+
+        return employeeRepository.save(existingEmployee);
     }
 
     @Override
-    public void deleteEmployee(Integer id) {
-        Employee employee = getEmployeeById(id);
-        employees.removeIf(emp -> emp.getId().equals(id));
+    public void deleteEmployee(Long id) {
+        employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        employeeRepository.deleteById(id);
     }
 }
