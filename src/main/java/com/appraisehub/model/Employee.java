@@ -1,5 +1,6 @@
 package com.appraisehub.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +24,11 @@ public class Employee {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    @JsonBackReference
+    private Department department;
+
     private String role;
 
 }
