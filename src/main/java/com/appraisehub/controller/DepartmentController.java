@@ -1,6 +1,7 @@
 package com.appraisehub.controller;
 
-import com.appraisehub.model.Department;
+import com.appraisehub.dto.DepartmentRequestDTO;
+import com.appraisehub.dto.DepartmentResponseDTO;
 import com.appraisehub.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,32 +18,31 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments(){
-        List<Department> departments = departmentService.getAllDepartments();
+    public ResponseEntity<List<DepartmentResponseDTO>> getAllDepartments() {
+        List<DepartmentResponseDTO> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);
-
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Department> getDepartmentById (@PathVariable Long id) {
-        Department department = departmentService.getDepartmentById(id);
+    public ResponseEntity<DepartmentResponseDTO> getDepartmentById(@PathVariable Long id) {
+        DepartmentResponseDTO department = departmentService.getDepartmentById(id);
         return ResponseEntity.ok(department);
     }
 
     @PostMapping
-    public ResponseEntity<Department> createDepartment(@RequestBody Department department){
-        Department savedDepartment = departmentService.createDepartment(department);
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@RequestBody DepartmentRequestDTO requestDTO) {
+        DepartmentResponseDTO savedDepartment = departmentService.createDepartment(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDepartment);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department department){
-        Department updatedDepartment = departmentService.updateDepartment(id,department);
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(@PathVariable Long id, @RequestBody DepartmentRequestDTO requestDTO) {
+        DepartmentResponseDTO updatedDepartment = departmentService.updateDepartment(id, requestDTO);
         return ResponseEntity.ok(updatedDepartment);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id){
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }

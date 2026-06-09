@@ -1,14 +1,16 @@
 package com.appraisehub.service;
 
-import com.appraisehub.model.Department;
+import com.appraisehub.dto.DepartmentRequestDTO;
+import com.appraisehub.dto.DepartmentResponseDTO;
+
 
 import java.util.List;
 
 public interface DepartmentService {
 
-    List<Department> getAllDepartments();
-    Department getDepartmentById(Long id);
-    Department createDepartment(Department department);
-    Department updateDepartment (Long id, Department department);
+    List<DepartmentResponseDTO> getAllDepartments();
+    DepartmentResponseDTO getDepartmentById(Long id);
+    DepartmentResponseDTO createDepartment(DepartmentRequestDTO requestDTO);
+    DepartmentResponseDTO updateDepartment (Long id, DepartmentRequestDTO requestDTO);
     void deleteDepartment(Long id);
 }

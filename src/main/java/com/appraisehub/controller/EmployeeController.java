@@ -1,6 +1,7 @@
 package com.appraisehub.controller;
 
-import com.appraisehub.model.Employee;
+import com.appraisehub.dto.EmployeeRequestDTO;
+import com.appraisehub.dto.EmployeeResponseDTO;
 import com.appraisehub.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,27 +18,27 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<List<Employee>> getAllEmployees(){
-        List<Employee> employees = employeeService.getAllEmployees();
+    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees(){
+        List<EmployeeResponseDTO> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Employee> getEmployeeById (@PathVariable Long id) {
-        Employee employee = employeeService.getEmployeeById(id);
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeById (@PathVariable Long id) {
+        EmployeeResponseDTO employee = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(employee);
     }
 
     @PostMapping
-    public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee){
-        Employee savedEmployee = employeeService.addEmployee(employee);
+    public ResponseEntity<EmployeeResponseDTO> addEmployee(@RequestBody EmployeeRequestDTO requestDTO){
+        EmployeeResponseDTO savedEmployee = employeeService.addEmployee(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employee){
-        Employee updatedEmployee = employeeService.updateEmployee(id,employee);
+    public ResponseEntity<EmployeeResponseDTO> updateEmployee(@PathVariable Long id, @RequestBody EmployeeRequestDTO requestDTO){
+        EmployeeResponseDTO updatedEmployee = employeeService.updateEmployee(id,requestDTO);
             return ResponseEntity.ok(updatedEmployee);
     }
 
