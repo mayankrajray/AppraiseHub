@@ -1,4 +1,4 @@
-package com.appraisehub.model;
+package com.appraisehub.entity;
 
 import com.appraisehub.enums.CycleStatus;
 import jakarta.persistence.*;

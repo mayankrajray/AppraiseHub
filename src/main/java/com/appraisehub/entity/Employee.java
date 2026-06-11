@@ -1,4 +1,4 @@
-package com.appraisehub.model;
+package com.appraisehub.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

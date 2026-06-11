@@ -3,7 +3,7 @@ package com.appraisehub.service.impl;
 import com.appraisehub.dto.DepartmentRequestDTO;
 import com.appraisehub.dto.DepartmentResponseDTO;
 import com.appraisehub.exception.ResourceNotFoundException;
-import com.appraisehub.model.Department;
+import com.appraisehub.entity.Department;
 import com.appraisehub.repository.DepartmentRepository;
 import com.appraisehub.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;

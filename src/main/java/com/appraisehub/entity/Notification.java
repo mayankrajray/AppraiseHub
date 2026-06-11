@@ -1,4 +1,4 @@
-package com.appraisehub.model;
+package com.appraisehub.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

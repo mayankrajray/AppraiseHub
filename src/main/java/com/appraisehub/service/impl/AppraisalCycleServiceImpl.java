@@ -4,7 +4,7 @@ import com.appraisehub.dto.AppraisalCycleRequestDTO;
 import com.appraisehub.dto.AppraisalCycleResponseDTO;
 import com.appraisehub.enums.CycleStatus;
 import com.appraisehub.exception.ResourceNotFoundException;
-import com.appraisehub.model.AppraisalCycle;
+import com.appraisehub.entity.AppraisalCycle;
 import com.appraisehub.repository.AppraisalCycleRepository;
 import com.appraisehub.service.AppraisalCycleService;
 import org.springframework.beans.factory.annotation.Autowired;

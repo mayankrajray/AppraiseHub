@@ -3,7 +3,7 @@ package com.appraisehub.service.impl;
 import com.appraisehub.dto.NotificationRequestDTO;
 import com.appraisehub.dto.NotificationResponseDTO;
 import com.appraisehub.exception.ResourceNotFoundException;
-import com.appraisehub.model.Notification;
+import com.appraisehub.entity.Notification;
 import com.appraisehub.repository.NotificationRepository;
 import com.appraisehub.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;

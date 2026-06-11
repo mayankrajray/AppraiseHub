@@ -3,8 +3,8 @@ package com.appraisehub.service.impl;
 import com.appraisehub.dto.EmployeeRequestDTO;
 import com.appraisehub.dto.EmployeeResponseDTO;
 import com.appraisehub.exception.ResourceNotFoundException;
-import com.appraisehub.model.Department;
-import com.appraisehub.model.Employee;
+import com.appraisehub.entity.Department;
+import com.appraisehub.entity.Employee;
 import com.appraisehub.repository.EmployeeRepository;
 import com.appraisehub.service.EmployeeService;
 

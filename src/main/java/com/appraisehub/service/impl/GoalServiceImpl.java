@@ -4,7 +4,7 @@ import com.appraisehub.dto.GoalRequestDTO;
 import com.appraisehub.dto.GoalResponseDTO;
 import com.appraisehub.enums.GoalStatus;
 import com.appraisehub.exception.ResourceNotFoundException;
-import com.appraisehub.model.Goal;
+import com.appraisehub.entity.Goal;
 import com.appraisehub.repository.GoalRepository;
 import com.appraisehub.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;

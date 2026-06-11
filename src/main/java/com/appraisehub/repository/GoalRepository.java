@@ -1,6 +1,6 @@
 package com.appraisehub.repository;
 
-import com.appraisehub.model.Goal;
+import com.appraisehub.entity.Goal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

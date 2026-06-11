@@ -1,6 +1,6 @@
-package com.appraisehub.model;
+package com.appraisehub.entity;
 
-import com.appraisehub.enums.AppraisalStatus;
+import com.appraisehub.enums.GoalStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,24 +14,24 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "appraisals")
-public class Appraisal {
+@Table(name = "goals")
+public class Goal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long employeeId;
-    private Long reviewerId;
-    private Long cycleId;
+    @Column(nullable = false)
+    private String title;
+
+    private String description;
+    private Double weightage;
 
     @Enumerated(EnumType.STRING)
-    private AppraisalStatus status = AppraisalStatus.PENDING;
+    private GoalStatus status= GoalStatus.PENDING;
 
-    private Double finalScore;
-    private String selfComments;
-    private String managerComments;
-    private LocalDateTime submittedAt;
+    private Long userId;
+    private Long cycleId;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
