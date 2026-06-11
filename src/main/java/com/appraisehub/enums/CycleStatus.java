@@ -1,7 +1,7 @@
 package com.appraisehub.enums;
 
 public enum CycleStatus {
-    PLANNED,
+    DRAFT,
     ACTIVE,
     CLOSED
 }
