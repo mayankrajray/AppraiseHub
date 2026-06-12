@@ -1,19 +1,20 @@
 package com.appraisehub.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "departments")
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Department {
 
     @Id
@@ -23,9 +24,11 @@ public class Department {
     @Column(nullable = false, unique = true)
     private String name;
 
-    private Long managerId;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Employee> employees = new ArrayList<>();
+    @Builder.Default
+    private List<User> users = new ArrayList<>();
 }
