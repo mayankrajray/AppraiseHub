@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DepartmentRequestDTO {
     private String name;
-    private Long managerId;
+    private String description;
 }

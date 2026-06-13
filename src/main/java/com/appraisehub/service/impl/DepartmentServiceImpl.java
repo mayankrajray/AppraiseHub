@@ -2,8 +2,9 @@ package com.appraisehub.service.impl;
 
 import com.appraisehub.dto.DepartmentRequestDTO;
 import com.appraisehub.dto.DepartmentResponseDTO;
-import com.appraisehub.exception.ResourceNotFoundException;
 import com.appraisehub.entity.Department;
+import com.appraisehub.exception.ResourceNotFoundException;
+import com.appraisehub.mappers.DepartmentMapper;
 import com.appraisehub.repository.DepartmentRepository;
 import com.appraisehub.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,26 +19,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private DepartmentRepository departmentRepository;
 
-    private DepartmentResponseDTO convertToResponseDTO(Department department) {
-        DepartmentResponseDTO responseDTO = new DepartmentResponseDTO();
-        responseDTO.setId(department.getId());
-        responseDTO.setName(department.getName());
-        responseDTO.setManagerId(department.getManagerId());
-        return responseDTO;
-    }
-
-    private Department convertToEntity(DepartmentRequestDTO requestDTO) {
-        Department department = new Department();
-        department.setName(requestDTO.getName());
-        department.setManagerId(requestDTO.getManagerId());
-        return department;
-    }
-
     @Override
     public List<DepartmentResponseDTO> getAllDepartments() {
         return departmentRepository.findAll()
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(DepartmentMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -45,33 +31,36 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentResponseDTO getDepartmentById(Long id) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Department not found with id: " + id));
-        return convertToResponseDTO(department);
+                        "Department", id));
+        return DepartmentMapper.toResponse(department);
     }
 
     @Override
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO requestDTO) {
-        Department department = convertToEntity(requestDTO);
+        Department department = Department.builder()
+                .name(requestDTO.getName())
+                .description(requestDTO.getDescription())
+                .build();
         Department savedDepartment = departmentRepository.save(department);
-        return convertToResponseDTO(savedDepartment);
+        return DepartmentMapper.toResponse(savedDepartment);
     }
 
     @Override
     public DepartmentResponseDTO updateDepartment(Long id, DepartmentRequestDTO requestDTO) {
         Department existing = departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Department not found with id: " + id));
+                        "Department", id));
         existing.setName(requestDTO.getName());
-        existing.setManagerId(requestDTO.getManagerId());
+        existing.setDescription(requestDTO.getDescription());
         Department updatedDepartment = departmentRepository.save(existing);
-        return convertToResponseDTO(updatedDepartment);
+        return DepartmentMapper.toResponse(updatedDepartment);
     }
 
     @Override
     public void deleteDepartment(Long id) {
         departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Department not found with id: " + id));
+                        "Department", id));
         departmentRepository.deleteById(id);
     }
 }

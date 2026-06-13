@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class DepartmentResponseDTO {
     private Long id;
     private String name;
-    private Long managerId;
+    private String description;
+    private int userCount;
 }
 
