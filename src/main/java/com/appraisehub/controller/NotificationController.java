@@ -1,5 +1,6 @@
 package com.appraisehub.controller;
 
+import com.appraisehub.dto.ApiResponse;
 import com.appraisehub.dto.NotificationRequestDTO;
 import com.appraisehub.dto.NotificationResponseDTO;
 import com.appraisehub.service.NotificationService;
@@ -18,38 +19,43 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @PostMapping
-    public ResponseEntity<NotificationResponseDTO> createNotification(
+    public ResponseEntity<ApiResponse<NotificationResponseDTO>> createNotification(
             @RequestBody NotificationRequestDTO requestDTO) {
-        NotificationResponseDTO savedNotification =
+        NotificationResponseDTO saved =
                 notificationService.createNotification(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedNotification);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Notification created successfully", saved));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<NotificationResponseDTO>> getNotificationsByUserId(
+    public ResponseEntity<ApiResponse<List<NotificationResponseDTO>>> getNotificationsByUserId(
             @PathVariable Long userId) {
         List<NotificationResponseDTO> notifications =
                 notificationService.getNotificationsByUserId(userId);
-        return ResponseEntity.ok(notifications);
+        return ResponseEntity.ok(ApiResponse.success(notifications));
     }
 
     @GetMapping("/user/{userId}/unread")
-    public ResponseEntity<List<NotificationResponseDTO>> getUnreadNotifications(
+    public ResponseEntity<ApiResponse<List<NotificationResponseDTO>>> getUnreadNotifications(
             @PathVariable Long userId) {
         List<NotificationResponseDTO> notifications =
                 notificationService.getUnreadNotificationsByUserId(userId);
-        return ResponseEntity.ok(notifications);
+        return ResponseEntity.ok(ApiResponse.success(notifications));
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<NotificationResponseDTO> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<NotificationResponseDTO>> markAsRead(
+            @PathVariable Long id) {
         NotificationResponseDTO notification = notificationService.markAsRead(id);
-        return ResponseEntity.ok(notification);
+        return ResponseEntity.ok(
+                ApiResponse.success("Notification marked as read", notification));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteNotification(
+            @PathVariable Long id) {
         notificationService.deleteNotification(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                ApiResponse.success("Notification deleted successfully", null));
     }
 }

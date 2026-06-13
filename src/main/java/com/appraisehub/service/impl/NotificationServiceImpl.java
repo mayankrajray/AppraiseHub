@@ -2,9 +2,12 @@ package com.appraisehub.service.impl;
 
 import com.appraisehub.dto.NotificationRequestDTO;
 import com.appraisehub.dto.NotificationResponseDTO;
-import com.appraisehub.exception.ResourceNotFoundException;
 import com.appraisehub.entity.Notification;
+import com.appraisehub.entity.User;
+import com.appraisehub.exception.ResourceNotFoundException;
+import com.appraisehub.mappers.NotificationMapper;
 import com.appraisehub.repository.NotificationRepository;
+import com.appraisehub.repository.UserRepository;
 import com.appraisehub.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,43 +21,55 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    private NotificationResponseDTO convertToResponseDTO(Notification notification) {
-        NotificationResponseDTO responseDTO = new NotificationResponseDTO();
-        responseDTO.setId(notification.getId());
-        responseDTO.setUserId(notification.getUserId());
-        responseDTO.setMessage(notification.getMessage());
-        responseDTO.setIsRead(notification.getIsRead());
-        responseDTO.setCreatedAt(notification.getCreatedAt());
-        return responseDTO;
-    }
-
-    private Notification convertToEntity(NotificationRequestDTO requestDTO) {
-        Notification notification = new Notification();
-        notification.setUserId(requestDTO.getUserId());
-        notification.setMessage(requestDTO.getMessage());
-        return notification;
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public NotificationResponseDTO createNotification(NotificationRequestDTO requestDTO) {
-        Notification notification = convertToEntity(requestDTO);
-        Notification savedNotification = notificationRepository.save(notification);
-        return convertToResponseDTO(savedNotification);
+        User user = userRepository.findById(requestDTO.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User", requestDTO.getUserId()));
+
+        Notification notification = Notification.builder()
+                .user(user)
+                .title(requestDTO.getTitle())
+                .message(requestDTO.getMessage())
+                .type(requestDTO.getType())
+                .build();
+
+        Notification saved = notificationRepository.save(notification);
+        return NotificationMapper.toResponse(saved);
+    }
+
+    @Override
+    public void send(Long userId, String title, String message,
+                     Notification.Type type, Object payload) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        Notification notification = Notification.builder()
+                .user(user)
+                .title(title)
+                .message(message)
+                .type(type)
+                .build();
+
+        notificationRepository.save(notification);
     }
 
     @Override
     public List<NotificationResponseDTO> getNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUserId(userId)
+        return notificationRepository.findByUser_Id(userId)
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(NotificationMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<NotificationResponseDTO> getUnreadNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUserIdAndIsRead(userId, false)
+        return notificationRepository.findByUser_IdAndIsRead(userId, false)
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(NotificationMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -62,17 +77,17 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationResponseDTO markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Notification not found with id: " + id));
-        notification.setIsRead(true);
-        Notification updatedNotification = notificationRepository.save(notification);
-        return convertToResponseDTO(updatedNotification);
+                        "Notification", id));
+        notification.setRead(true);
+        Notification updated = notificationRepository.save(notification);
+        return NotificationMapper.toResponse(updated);
     }
 
     @Override
     public void deleteNotification(Long id) {
         notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Notification not found with id: " + id));
+                        "Notification", id));
         notificationRepository.deleteById(id);
     }
 }
