@@ -1,8 +1,6 @@
 package com.appraisehub.controller;
 
-import com.appraisehub.dto.AppraisalRequestDTO;
-import com.appraisehub.dto.AppraisalResponseDTO;
-import com.appraisehub.enums.AppraisalStatus;
+import com.appraisehub.dto.*;
 import com.appraisehub.service.AppraisalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,71 +10,112 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/appraisals")
+@RequestMapping("/api/appraisals")
 public class AppraisalController {
 
     @Autowired
     private AppraisalService appraisalService;
 
     @GetMapping
-    public ResponseEntity<List<AppraisalResponseDTO>> getAllAppraisals() {
-        List<AppraisalResponseDTO> appraisals = appraisalService.getAllAppraisals();
-        return ResponseEntity.ok(appraisals);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<AppraisalResponseDTO> getAppraisalById(@PathVariable Long id) {
-        AppraisalResponseDTO appraisal = appraisalService.getAppraisalById(id);
-        return ResponseEntity.ok(appraisal);
+    public ResponseEntity<ApiResponse<List<AppraisalResponseDTO>>> getAllAppraisals() {
+        return ResponseEntity.ok(
+                ApiResponse.success(appraisalService.getAllAppraisals()));
     }
 
     @PostMapping
-    public ResponseEntity<AppraisalResponseDTO> createAppraisal(@RequestBody AppraisalRequestDTO requestDTO) {
-        AppraisalResponseDTO savedAppraisal = appraisalService.createAppraisal(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAppraisal);
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> createAppraisal(
+            @RequestBody CreateAppraisalRequestDTO request) {
+        AppraisalResponseDTO response = appraisalService.createAppraisal(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Appraisal created successfully", response));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AppraisalResponseDTO> updateAppraisal(@PathVariable Long id, @RequestBody AppraisalRequestDTO requestDTO) {
-        AppraisalResponseDTO updatedAppraisal = appraisalService.updateAppraisal(id, requestDTO);
-        return ResponseEntity.ok(updatedAppraisal);
+    @PostMapping("/cycle/bulk-create")
+    public ResponseEntity<ApiResponse<BulkCycleResponseDTO>> createBulkCycle(
+            @RequestBody BulkCycleRequestDTO request) {
+        BulkCycleResponseDTO response = appraisalService.createBulkCycle(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Bulk cycle created", response));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppraisal(@PathVariable Long id) {
-        appraisalService.deleteAppraisal(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<AppraisalResponseDTO>>> getMyAppraisals(
+            @RequestParam Long employeeId) {
+        return ResponseEntity.ok(
+                ApiResponse.success(appraisalService.getMyAppraisals(employeeId)));
     }
 
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<AppraisalResponseDTO>> getAppraisalsByEmployeeId(@PathVariable Long employeeId) {
-        List<AppraisalResponseDTO> appraisals = appraisalService.getAppraisalsByEmployeeId(employeeId);
-        return ResponseEntity.ok(appraisals);
+    @GetMapping("/team")
+    public ResponseEntity<ApiResponse<List<AppraisalResponseDTO>>> getTeamAppraisals(
+            @RequestParam Long managerId) {
+        return ResponseEntity.ok(
+                ApiResponse.success(appraisalService.getTeamAppraisals(managerId)));
     }
 
-    @GetMapping("/cycle/{cycleId}")
-    public ResponseEntity<List<AppraisalResponseDTO>> getAppraisalsByCycleId(@PathVariable Long cycleId) {
-        List<AppraisalResponseDTO> appraisals = appraisalService.getAppraisalsByCycleId(cycleId);
-        return ResponseEntity.ok(appraisals);
-    }
-
-    @GetMapping("/reviewer/{reviewerId}")
-    public ResponseEntity<List<AppraisalResponseDTO>> getAppraisalsByReviewerId(@PathVariable Long reviewerId) {
-        List<AppraisalResponseDTO> appraisals = appraisalService.getAppraisalsByReviewerId(reviewerId);
-        return ResponseEntity.ok(appraisals);
-    }
-
-    @PatchMapping("/{id}/submit")
-    public ResponseEntity<AppraisalResponseDTO> submitAppraisal(@PathVariable Long id) {
-        AppraisalResponseDTO appraisal = appraisalService.submitAppraisal(id);
-        return ResponseEntity.ok(appraisal);
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<AppraisalResponseDTO> updateAppraisalStatus(
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> getAppraisalById(
             @PathVariable Long id,
-            @RequestParam AppraisalStatus status) {
-        AppraisalResponseDTO appraisal = appraisalService.updateAppraisalStatus(id, status);
-        return ResponseEntity.ok(appraisal);
+            @RequestParam Long requesterId) {
+        return ResponseEntity.ok(
+                ApiResponse.success(appraisalService.getAppraisalById(id, requesterId)));
+    }
+
+    @PutMapping("/{id}/self-assessment/draft")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> saveSelfAssessmentDraft(
+            @PathVariable Long id,
+            @RequestBody SelfAssessmentRequestDTO request,
+            @RequestParam Long employeeId) {
+        AppraisalResponseDTO response =
+                appraisalService.saveSelfAssessmentDraft(id, request, employeeId);
+        return ResponseEntity.ok(ApiResponse.success("Draft saved", response));
+    }
+
+    @PutMapping("/{id}/self-assessment/submit")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> submitSelfAssessment(
+            @PathVariable Long id,
+            @RequestBody SelfAssessmentRequestDTO request,
+            @RequestParam Long employeeId) {
+        AppraisalResponseDTO response =
+                appraisalService.submitSelfAssessment(id, request, employeeId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Self-assessment submitted", response));
+    }
+
+    @PutMapping("/{id}/manager-review/draft")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> saveManagerReviewDraft(
+            @PathVariable Long id,
+            @RequestBody ManagerReviewRequestDTO request,
+            @RequestParam Long managerId) {
+        AppraisalResponseDTO response =
+                appraisalService.saveManagerReviewDraft(id, request, managerId);
+        return ResponseEntity.ok(ApiResponse.success("Review draft saved", response));
+    }
+
+    @PutMapping("/{id}/manager-review/submit")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> submitManagerReview(
+            @PathVariable Long id,
+            @RequestBody ManagerReviewRequestDTO request,
+            @RequestParam Long managerId) {
+        AppraisalResponseDTO response =
+                appraisalService.submitManagerReview(id, request, managerId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Manager review submitted", response));
+    }
+
+    @PatchMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> approveAppraisal(
+            @PathVariable Long id) {
+        AppraisalResponseDTO response = appraisalService.approveAppraisal(id);
+        return ResponseEntity.ok(ApiResponse.success("Appraisal approved", response));
+    }
+
+    @PatchMapping("/{id}/acknowledge")
+    public ResponseEntity<ApiResponse<AppraisalResponseDTO>> acknowledgeAppraisal(
+            @PathVariable Long id,
+            @RequestParam Long employeeId) {
+        AppraisalResponseDTO response =
+                appraisalService.acknowledgeAppraisal(id, employeeId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Appraisal acknowledged", response));
     }
 }

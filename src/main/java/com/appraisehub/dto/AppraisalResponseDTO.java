@@ -1,25 +1,48 @@
 package com.appraisehub.dto;
 
 import com.appraisehub.enums.AppraisalStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.appraisehub.enums.CycleStatus;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class AppraisalResponseDTO {
+
     private Long id;
+
+    // Cycle info
+    private String cycleName;
+    private LocalDate cycleStartDate;
+    private LocalDate cycleEndDate;
+    private CycleStatus cycleStatus;
+
+    // Participants
     private Long employeeId;
-    private Long reviewerId;
-    private Long cycleId;
-    private AppraisalStatus status;
-    private Double finalScore;
-    private String selfComments;
+    private String employeeName;
+    private String employeeJobTitle;
+    private String employeeDepartment;
+    private Long managerId;
+    private String managerName;
+
+    // Self assessment
+    private String whatWentWell;
+    private String whatToImprove;
+    private String achievements;
+    private Integer selfRating;
+
+    // Manager review
+    private String managerStrengths;
+    private String managerImprovements;
     private String managerComments;
+    private Integer managerRating;
+
+    // Status and timestamps
+    private AppraisalStatus appraisalStatus;
     private LocalDateTime submittedAt;
+    private LocalDateTime approvedAt;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

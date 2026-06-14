@@ -1,20 +1,32 @@
 package com.appraisehub.service;
 
-import com.appraisehub.dto.AppraisalRequestDTO;
-import com.appraisehub.dto.AppraisalResponseDTO;
-import com.appraisehub.enums.AppraisalStatus;
+import com.appraisehub.dto.*;
 
 import java.util.List;
 
 public interface AppraisalService {
+
+    AppraisalResponseDTO createAppraisal(CreateAppraisalRequestDTO request);
+
     List<AppraisalResponseDTO> getAllAppraisals();
-    AppraisalResponseDTO getAppraisalById(Long id);
-    AppraisalResponseDTO createAppraisal(AppraisalRequestDTO requestDTO);
-    AppraisalResponseDTO updateAppraisal(Long id, AppraisalRequestDTO requestDTO);
-    void deleteAppraisal(Long id);
-    List<AppraisalResponseDTO> getAppraisalsByEmployeeId(Long employeeId);
-    List<AppraisalResponseDTO> getAppraisalsByCycleId(Long cycleId);
-    List<AppraisalResponseDTO> getAppraisalsByReviewerId(Long reviewerId);
-    AppraisalResponseDTO submitAppraisal(Long id);
-    AppraisalResponseDTO updateAppraisalStatus(Long id, AppraisalStatus status);
+
+    BulkCycleResponseDTO createBulkCycle(BulkCycleRequestDTO request);
+
+    List<AppraisalResponseDTO> getMyAppraisals(Long employeeId);
+
+    List<AppraisalResponseDTO> getTeamAppraisals(Long managerId);
+
+    AppraisalResponseDTO getAppraisalById(Long appraisalId, Long requesterId);
+
+    AppraisalResponseDTO saveSelfAssessmentDraft(Long appraisalId,SelfAssessmentRequestDTO request, Long employeeId);
+
+    AppraisalResponseDTO submitSelfAssessment(Long appraisalId,SelfAssessmentRequestDTO request, Long employeeId);
+
+    AppraisalResponseDTO saveManagerReviewDraft(Long appraisalId,ManagerReviewRequestDTO request, Long managerId);
+
+    AppraisalResponseDTO submitManagerReview(Long appraisalId,ManagerReviewRequestDTO request, Long managerId);
+
+    AppraisalResponseDTO approveAppraisal(Long appraisalId);
+
+    AppraisalResponseDTO acknowledgeAppraisal(Long appraisalId, Long employeeId);
 }
