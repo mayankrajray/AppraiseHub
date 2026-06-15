@@ -72,13 +72,9 @@ public class AppraisalController {
 
     @PutMapping("/{id}/self-assessment/submit")
     public ResponseEntity<ApiResponse<AppraisalResponseDTO>> submitSelfAssessment(
-            @PathVariable Long id,
-            @RequestBody SelfAssessmentRequestDTO request,
-            @RequestParam Long employeeId) {
-        AppraisalResponseDTO response =
-                appraisalService.submitSelfAssessment(id, request, employeeId);
-        return ResponseEntity.ok(
-                ApiResponse.success("Self-assessment submitted", response));
+            @PathVariable Long id, @RequestBody SelfAssessmentRequestDTO request,@RequestParam Long employeeId) {
+        AppraisalResponseDTO response =appraisalService.submitSelfAssessment(id, request, employeeId);
+        return ResponseEntity.ok(ApiResponse.success("Self-assessment submitted", response));
     }
 
     @PutMapping("/{id}/manager-review/draft")

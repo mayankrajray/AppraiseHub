@@ -1,16 +1,15 @@
 package com.appraisehub.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.time.LocalDate;
+
+@Getter
+@Setter
 public class GoalRequestDTO {
+    private Long appraisalId;
     private String title;
     private String description;
-    private Double weightage;
-    private Long userId;
-    private Long cycleId;
+    private LocalDate dueDate;
 }

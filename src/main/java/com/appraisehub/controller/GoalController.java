@@ -1,8 +1,9 @@
 package com.appraisehub.controller;
 
+import com.appraisehub.dto.ApiResponse;
+import com.appraisehub.dto.GoalProgressRequestDTO;
 import com.appraisehub.dto.GoalRequestDTO;
 import com.appraisehub.dto.GoalResponseDTO;
-import com.appraisehub.enums.GoalStatus;
 import com.appraisehub.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,67 +13,68 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/goals")
+@RequestMapping("/api/goals")
 public class GoalController {
 
     @Autowired
     private GoalService goalService;
 
-    @GetMapping
-    public ResponseEntity<List<GoalResponseDTO>> getAllGoals() {
-        List<GoalResponseDTO> goals = goalService.getAllGoals();
-        return ResponseEntity.ok(goals);
+    @PostMapping
+    public ResponseEntity<ApiResponse<GoalResponseDTO>> createGoal(
+            @RequestBody GoalRequestDTO request,
+            @RequestParam Long managerId) {
+        GoalResponseDTO response = goalService.createGoal(request, managerId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Goal created successfully", response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GoalResponseDTO> getGoalById(@PathVariable Long id) {
-        GoalResponseDTO goal = goalService.getGoalById(id);
-        return ResponseEntity.ok(goal);
+    public ResponseEntity<ApiResponse<GoalResponseDTO>> getGoalById(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+                ApiResponse.success(goalService.getGoalById(id)));
     }
 
-    @PostMapping
-    public ResponseEntity<GoalResponseDTO> createGoal(@RequestBody GoalRequestDTO requestDTO) {
-        GoalResponseDTO savedGoal = goalService.createGoal(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedGoal);
+    @GetMapping("/appraisal/{appraisalId}")
+    public ResponseEntity<ApiResponse<List<GoalResponseDTO>>> getGoalsByAppraisal(
+            @PathVariable Long appraisalId) {
+        return ResponseEntity.ok(
+                ApiResponse.success(goalService.getGoalsByAppraisal(appraisalId)));
+    }
+
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<ApiResponse<List<GoalResponseDTO>>> getGoalsByEmployee(
+            @PathVariable Long employeeId) {
+        return ResponseEntity.ok(
+                ApiResponse.success(goalService.getGoalsByEmployee(employeeId)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GoalResponseDTO> updateGoal(@PathVariable Long id, @RequestBody GoalRequestDTO requestDTO) {
-        GoalResponseDTO updatedGoal = goalService.updateGoal(id, requestDTO);
-        return ResponseEntity.ok(updatedGoal);
+    public ResponseEntity<ApiResponse<GoalResponseDTO>> updateGoal(
+            @PathVariable Long id,
+            @RequestBody GoalRequestDTO request,
+            @RequestParam Long managerId) {
+        GoalResponseDTO response = goalService.updateGoal(id, request, managerId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Goal updated successfully", response));
+    }
+
+    @PatchMapping("/{id}/progress")
+    public ResponseEntity<ApiResponse<GoalResponseDTO>> updateProgress(
+            @PathVariable Long id,
+            @RequestBody GoalProgressRequestDTO request,
+            @RequestParam Long employeeId) {
+        GoalResponseDTO response = goalService.updateProgress(id, request, employeeId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Goal progress updated", response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGoal(@PathVariable Long id) {
-        goalService.deleteGoal(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<GoalResponseDTO>> getGoalsByUserId(@PathVariable Long userId) {
-        List<GoalResponseDTO> goals = goalService.getGoalsByUserId(userId);
-        return ResponseEntity.ok(goals);
-    }
-
-    @GetMapping("/cycle/{cycleId}")
-    public ResponseEntity<List<GoalResponseDTO>> getGoalsByCycleId(@PathVariable Long cycleId) {
-        List<GoalResponseDTO> goals = goalService.getGoalsByCycleId(cycleId);
-        return ResponseEntity.ok(goals);
-    }
-
-    @GetMapping("/user/{userId}/cycle/{cycleId}")
-    public ResponseEntity<List<GoalResponseDTO>> getGoalsByUserIdAndCycleId(
-            @PathVariable Long userId,
-            @PathVariable Long cycleId) {
-        List<GoalResponseDTO> goals = goalService.getGoalsByUserIdAndCycleId(userId, cycleId);
-        return ResponseEntity.ok(goals);
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<GoalResponseDTO> updateGoalStatus(
+    public ResponseEntity<ApiResponse<Void>> deleteGoal(
             @PathVariable Long id,
-            @RequestParam GoalStatus status) {
-        GoalResponseDTO goal = goalService.updateGoalStatus(id, status);
-        return ResponseEntity.ok(goal);
+            @RequestParam Long managerId) {
+        goalService.deleteGoal(id, managerId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Goal deleted successfully", null));
     }
 }

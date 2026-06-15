@@ -1,23 +1,20 @@
 package com.appraisehub.dto;
 
-import com.appraisehub.enums.GoalStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.appraisehub.entity.Goal;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class GoalResponseDTO {
     private Long id;
+    private Long appraisalId;
+    private Long employeeId;
+    private String employeeName;
     private String title;
     private String description;
-    private Double weightage;
-    private GoalStatus status;
-    private Long userId;
-    private Long cycleId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Goal.Status status;
+    private LocalDate dueDate;
 }

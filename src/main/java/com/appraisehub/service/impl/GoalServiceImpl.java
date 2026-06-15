@@ -1,14 +1,19 @@
 package com.appraisehub.service.impl;
 
+import com.appraisehub.dto.GoalProgressRequestDTO;
 import com.appraisehub.dto.GoalRequestDTO;
 import com.appraisehub.dto.GoalResponseDTO;
-import com.appraisehub.enums.GoalStatus;
-import com.appraisehub.exception.ResourceNotFoundException;
+import com.appraisehub.entity.Appraisal;
 import com.appraisehub.entity.Goal;
+import com.appraisehub.exception.ResourceNotFoundException;
+import com.appraisehub.exception.UnauthorizedAccessException;
+import com.appraisehub.mappers.GoalMapper;
+import com.appraisehub.repository.AppraisalRepository;
 import com.appraisehub.repository.GoalRepository;
 import com.appraisehub.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,106 +24,116 @@ public class GoalServiceImpl implements GoalService {
     @Autowired
     private GoalRepository goalRepository;
 
-    private GoalResponseDTO convertToResponseDTO(Goal goal) {
-        GoalResponseDTO responseDTO = new GoalResponseDTO();
-        responseDTO.setId(goal.getId());
-        responseDTO.setTitle(goal.getTitle());
-        responseDTO.setDescription(goal.getDescription());
-        responseDTO.setWeightage(goal.getWeightage());
-        responseDTO.setStatus(goal.getStatus());
-        responseDTO.setUserId(goal.getUserId());
-        responseDTO.setCycleId(goal.getCycleId());
-        responseDTO.setCreatedAt(goal.getCreatedAt());
-        responseDTO.setUpdatedAt(goal.getUpdatedAt());
-        return responseDTO;
-    }
+    @Autowired
+    private AppraisalRepository appraisalRepository;
 
-    private Goal convertToEntity(GoalRequestDTO requestDTO) {
-        Goal goal = new Goal();
-        goal.setTitle(requestDTO.getTitle());
-        goal.setDescription(requestDTO.getDescription());
-        goal.setWeightage(requestDTO.getWeightage());
-        goal.setUserId(requestDTO.getUserId());
-        goal.setCycleId(requestDTO.getCycleId());
-        return goal;
+    @Override
+    @Transactional
+    public GoalResponseDTO createGoal(GoalRequestDTO request, Long managerId) {
+        if (request.getAppraisalId() == null) {
+            throw new IllegalArgumentException("Appraisal ID is required");
+        }
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new IllegalArgumentException("Goal title is required");
+        }
+
+        Appraisal appraisal = appraisalRepository.findByIdWithDetails(
+                        request.getAppraisalId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Appraisal", request.getAppraisalId()));
+
+        if (!appraisal.getManager().getId().equals(managerId)) {
+            throw new UnauthorizedAccessException(
+                    "Access denied: you are not the manager for this appraisal");
+        }
+
+        Goal goal = Goal.builder()
+                .appraisal(appraisal)
+                .employee(appraisal.getEmployee())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .dueDate(request.getDueDate())
+                .build();
+
+        goalRepository.save(goal);
+        return GoalMapper.toResponse(goal);
     }
 
     @Override
-    public List<GoalResponseDTO> getAllGoals() {
-        return goalRepository.findAll()
+    @Transactional(readOnly = true)
+    public GoalResponseDTO getGoalById(Long goalId) {
+        Goal goal = findById(goalId);
+        return GoalMapper.toResponse(goal);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GoalResponseDTO> getGoalsByAppraisal(Long appraisalId) {
+        return goalRepository.findByAppraisalId(appraisalId)
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(GoalMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public GoalResponseDTO getGoalById(Long id) {
-        Goal goal = goalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Goal not found with id: " + id));
-        return convertToResponseDTO(goal);
-    }
-
-    @Override
-    public GoalResponseDTO createGoal(GoalRequestDTO requestDTO) {
-        Goal goal = convertToEntity(requestDTO);
-        Goal savedGoal = goalRepository.save(goal);
-        return convertToResponseDTO(savedGoal);
-    }
-
-    @Override
-    public GoalResponseDTO updateGoal(Long id, GoalRequestDTO requestDTO) {
-        Goal existing = goalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Goal not found with id: " + id));
-        existing.setTitle(requestDTO.getTitle());
-        existing.setDescription(requestDTO.getDescription());
-        existing.setWeightage(requestDTO.getWeightage());
-        existing.setUserId(requestDTO.getUserId());
-        existing.setCycleId(requestDTO.getCycleId());
-        Goal updatedGoal = goalRepository.save(existing);
-        return convertToResponseDTO(updatedGoal);
-    }
-
-    @Override
-    public void deleteGoal(Long id) {
-        goalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Goal not found with id: " + id));
-        goalRepository.deleteById(id);
-    }
-
-    @Override
-    public List<GoalResponseDTO> getGoalsByUserId(Long userId) {
-        return goalRepository.findByUserId(userId)
+    @Transactional(readOnly = true)
+    public List<GoalResponseDTO> getGoalsByEmployee(Long employeeId) {
+        return goalRepository.findByEmployeeId(employeeId)
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(GoalMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<GoalResponseDTO> getGoalsByCycleId(Long cycleId) {
-        return goalRepository.findByCycleId(cycleId)
-                .stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+    @Transactional
+    public GoalResponseDTO updateGoal(Long goalId, GoalRequestDTO request,
+                                      Long managerId) {
+        Goal goal = findById(goalId);
+
+        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
+            throw new UnauthorizedAccessException(
+                    "Access denied: only the manager can update this goal");
+        }
+
+        if (request.getTitle() != null) goal.setTitle(request.getTitle());
+        if (request.getDescription() != null) goal.setDescription(request.getDescription());
+        if (request.getDueDate() != null) goal.setDueDate(request.getDueDate());
+
+        goalRepository.save(goal);
+        return GoalMapper.toResponse(goal);
     }
 
     @Override
-    public List<GoalResponseDTO> getGoalsByUserIdAndCycleId(Long userId, Long cycleId) {
-        return goalRepository.findByUserIdAndCycleId(userId, cycleId)
-                .stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+    @Transactional
+    public GoalResponseDTO updateProgress(Long goalId,
+                                          GoalProgressRequestDTO request, Long employeeId) {
+        Goal goal = findById(goalId);
+
+        if (!goal.getEmployee().getId().equals(employeeId)) {
+            throw new UnauthorizedAccessException(
+                    "Access denied: this is not your goal");
+        }
+
+        goal.setStatus(request.getStatus());
+        goalRepository.save(goal);
+        return GoalMapper.toResponse(goal);
     }
 
     @Override
-    public GoalResponseDTO updateGoalStatus(Long id, GoalStatus status) {
-        Goal goal = goalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Goal not found with id: " + id));
-        goal.setStatus(status);
-        Goal updatedGoal = goalRepository.save(goal);
-        return convertToResponseDTO(updatedGoal);
+    @Transactional
+    public void deleteGoal(Long goalId, Long managerId) {
+        Goal goal = findById(goalId);
+
+        if (!goal.getAppraisal().getManager().getId().equals(managerId)) {
+            throw new UnauthorizedAccessException(
+                    "Access denied: only the manager can delete this goal");
+        }
+
+        goalRepository.delete(goal);
+    }
+
+    private Goal findById(Long id) {
+        return goalRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Goal", id));
     }
 }

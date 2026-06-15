@@ -1,41 +1,52 @@
 package com.appraisehub.entity;
 
-import com.appraisehub.enums.GoalStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "goals")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Goal {
+
+    public enum Status {
+        NOT_STARTED,
+        IN_PROGRESS,
+        COMPLETED,
+        CANCELLED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appraisal_id", nullable = false)
+    private Appraisal appraisal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User employee;
+
+    @Column(nullable = false, length = 200)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
-    private Double weightage;
+
+    @Column(name = "progress_percent", nullable = false)
+    @Builder.Default
+    private Integer progressPercent = 0;
 
     @Enumerated(EnumType.STRING)
-    private GoalStatus status= GoalStatus.PENDING;
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Status status = Status.NOT_STARTED;
 
-    private Long userId;
-    private Long cycleId;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(name = "due_date")
+    private LocalDate dueDate;
 }

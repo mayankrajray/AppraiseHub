@@ -2,19 +2,44 @@ package com.appraisehub.repository;
 
 import com.appraisehub.entity.Goal;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface GoalRepository extends JpaRepository<Goal,Long> {
+public interface GoalRepository extends JpaRepository<Goal, Long> {
 
-    //Manager wants to see all goals for one employee
-    List<Goal> findByUserId(Long userId);
+    @Query("""
+            select g
+            from Goal g
+            join fetch g.employee
+            join fetch g.appraisal
+            where g.id = :id
+            """)
+    Optional<Goal> findByIdWithDetails(@Param("id") Long id);
 
-    //HR wants to see all goals in one cycle
-    List<Goal> findByCycleId(Long cycleId);
+    @Query("""
+            select g
+            from Goal g
+            join fetch g.employee
+            join fetch g.appraisal
+            where g.appraisal.id = :appraisalId
+            """)
+    List<Goal> findByAppraisalId(@Param("appraisalId") Long appraisalId);
 
-    //Manager wants goals for specific employee in specific cycle
-    List<Goal> findByUserIdAndCycleId(Long userId, Long cycleId);
+    @Query("""
+            select g
+            from Goal g
+            join fetch g.employee
+            join fetch g.appraisal
+            where g.employee.id = :employeeId
+            """)
+    List<Goal> findByEmployeeId(@Param("employeeId") Long employeeId);
+
+    long countByAppraisalId(Long appraisalId);
+
+    long countByAppraisalIdAndStatus(Long appraisalId, Goal.Status status);
 }
