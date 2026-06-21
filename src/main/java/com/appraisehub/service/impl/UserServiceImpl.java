@@ -12,6 +12,7 @@ import com.appraisehub.repository.DepartmentRepository;
 import com.appraisehub.repository.UserRepository;
 import com.appraisehub.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public UserResponseDTO createUser(UserRequestDTO requestDTO) {
         if (userRepository.existsByEmail(requestDTO.getEmail())) {
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserService {
         User.UserBuilder builder = User.builder()
                 .fullName(requestDTO.getFullName())
                 .email(requestDTO.getEmail())
-                .password(requestDTO.getPassword())
+                .password(passwordEncoder.encode(requestDTO.getPassword()))
                 .role(requestDTO.getRole())
                 .jobTitle(requestDTO.getJobTitle());
 
