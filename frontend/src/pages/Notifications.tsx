@@ -26,22 +26,35 @@ export function Notifications() {
     queryFn: () => notificationsApi.byUser(user.userId),
   });
 
+  const listKey = ["notifications", "all", user.userId];
+
+  // Patch the cached list directly with the row(s) the backend just confirmed
+  // as updated, instead of only relying on a background refetch — a stale
+  // in-flight refetch was leaving the page showing "unread" even though the
+  // backend had already saved read: true.
+  function applyReadLocally(updatedIds: number[]) {
+    queryClient.setQueryData<NotificationRecord[]>(listKey, (old) =>
+      old?.map((n) => (updatedIds.includes(n.id) ? { ...n, read: true } : n)) ?? old,
+    );
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  }
+
   const markReadMutation = useMutation({
     mutationFn: (id: number) => notificationsApi.markRead(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    onSuccess: (_updated, id) => {
+      applyReadLocally([id]);
     },
     onError: (e) => toast.error(e instanceof ApiError ? e.message : "Could not update"),
   });
 
   const items = [...(data ?? [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const unreadCount = items.filter((n) => !n.isRead).length;
+  const unreadCount = items.filter((n) => !n.read).length;
 
   async function markAllRead() {
-    const unread = items.filter((n) => !n.isRead);
+    const unread = items.filter((n) => !n.read);
     // No bulk endpoint on the backend — mark each unread notification individually.
     await Promise.all(unread.map((n) => notificationsApi.markRead(n.id)));
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    applyReadLocally(unread.map((n) => n.id));
     toast.success("All caught up");
   }
 
@@ -66,7 +79,7 @@ export function Notifications() {
           <p className="p-6 text-sm text-glow-100/50">No notifications yet.</p>
         ) : (
           items.map((n: NotificationRecord) => (
-            <div key={n.id} className={`flex items-start gap-3 px-5 py-4 ${!n.isRead ? "bg-glow-500/5" : ""}`}>
+            <div key={n.id} className={`flex items-start gap-3 px-5 py-4 ${!n.read ? "bg-glow-500/5" : ""}`}>
               <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ink-700 text-glow-300">
                 {iconFor[n.type]}
               </span>
@@ -75,7 +88,7 @@ export function Notifications() {
                 <p className="text-sm text-glow-100/60">{n.message}</p>
                 <p className="mt-1 text-xs text-glow-100/40">{formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}</p>
               </div>
-              {!n.isRead && (
+              {!n.read && (
                 <button onClick={() => markReadMutation.mutate(n.id)} className="shrink-0 text-xs text-glow-400 hover:underline">
                   Mark read
                 </button>
