@@ -45,7 +45,10 @@ export interface UserRecord {
   email: string;
   role: Role;
   jobTitle: string | null;
-  isActive: boolean;
+  // Backend serializes the entity's `isActive` boolean field as `active` in
+  // JSON (Lombok's isActive() getter is read by Jackson as bean property
+  // "active", stripping the "is" prefix) — this name matches the real payload.
+  active: boolean;
   departmentId: number | null;
   departmentName: string | null;
   managerId: number | null;
@@ -100,6 +103,6 @@ export interface NotificationRecord {
   title: string;
   message: string;
   type: NotificationType;
-  isRead: boolean;
+  read: boolean;
   createdAt: string;
 }
