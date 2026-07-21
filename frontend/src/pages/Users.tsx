@@ -62,7 +62,7 @@ export function Users() {
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: (u: UserRecord) => (u.isActive ? usersApi.deactivate(u.id) : usersApi.activate(u.id)),
+    mutationFn: (u: UserRecord) => (u.active ? usersApi.deactivate(u.id) : usersApi.activate(u.id)),
     onSuccess: () => {
       toast.success("Status updated");
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -108,8 +108,8 @@ export function Users() {
                   <td className="px-5 py-3 text-glow-100/80">{u.departmentName ?? "—"}</td>
                   <td className="px-5 py-3 text-glow-100/80">{u.managerName ?? "—"}</td>
                   <td className="px-5 py-3">
-                    <span className={`tag ${u.isActive ? "border border-glow-500/30 bg-glow-500/15 text-glow-300" : "border border-rose-500/30 bg-rose-500/15 text-rose-400"}`}>
-                      {u.isActive ? "Active" : "Inactive"}
+                    <span className={`tag ${u.active ? "border border-glow-500/30 bg-glow-500/15 text-glow-300" : "border border-rose-500/30 bg-rose-500/15 text-rose-400"}`}>
+                      {u.active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-5 py-3">
@@ -119,7 +119,7 @@ export function Users() {
                       </button>
                       <button
                         onClick={() => toggleActiveMutation.mutate(u)}
-                        title={u.isActive ? "Deactivate" : "Activate"}
+                        title={u.active ? "Deactivate" : "Activate"}
                         className="rounded-md p-1.5 text-amber-400/80 hover:bg-amber-500/10"
                       >
                         <Power size={16} />

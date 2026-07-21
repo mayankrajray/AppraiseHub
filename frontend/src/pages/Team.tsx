@@ -47,7 +47,7 @@ export function Team() {
               <div className="mt-3 space-y-1 text-xs text-glow-100/50">
                 <p>{t.email}</p>
                 <p>{t.departmentName ?? "No department"}</p>
-                <p className={t.isActive ? "text-glow-400" : "text-rose-400"}>{t.isActive ? "Active" : "Inactive"}</p>
+                <p className={t.active ? "text-glow-400" : "text-rose-400"}>{t.active ? "Active" : "Inactive"}</p>
               </div>
             </div>
           ))}

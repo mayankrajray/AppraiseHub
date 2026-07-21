@@ -27,7 +27,7 @@ public class Department {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
     @JsonManagedReference
     @Builder.Default
     private List<User> users = new ArrayList<>();
