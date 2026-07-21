@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Plus, PencilSimple, Trash } from "phosphor-react";
-import { departmentsApi } from "../lib/api";
+import { Plus, PencilSimple, Trash, UsersThree } from "phosphor-react";
+import { departmentsApi, usersApi } from "../lib/api";
 import { SlideOver } from "../components/SlideOver";
 import { ApiError } from "../lib/http";
 import type { DepartmentRecord } from "../lib/types";
@@ -13,6 +13,13 @@ export function Departments() {
   const [editing, setEditing] = useState<DepartmentRecord | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", description: "" });
+  const [viewingDept, setViewingDept] = useState<DepartmentRecord | null>(null);
+
+  const membersQuery = useQuery({
+    queryKey: ["users", "department", viewingDept?.id],
+    queryFn: () => usersApi.byDepartment(viewingDept!.id),
+    enabled: viewingDept !== null,
+  });
 
   function openCreate() {
     setEditing(null);
@@ -62,23 +69,43 @@ export function Departments() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {departments?.map((d) => (
-            <div key={d.id} className="panel space-y-2 p-5">
+            <button
+              key={d.id}
+              onClick={() => setViewingDept(d)}
+              className="panel space-y-2 p-5 text-left transition hover:border-glow-500/40"
+            >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-display text-lg font-semibold text-glow-100">{d.name}</p>
-                  <p className="text-xs text-glow-300/60">{d.userCount} members</p>
+                  <p className="text-xs text-glow-300/60">{d.userCount} members · click to view</p>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(d)} className="rounded-md p-1.5 text-glow-100/60 hover:bg-ink-700">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(d);
+                    }}
+                    className="rounded-md p-1.5 text-glow-100/60 hover:bg-ink-700"
+                  >
                     <PencilSimple size={16} />
-                  </button>
-                  <button onClick={() => removeMutation.mutate(d.id)} className="rounded-md p-1.5 text-rose-400/70 hover:bg-rose-500/10">
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeMutation.mutate(d.id);
+                    }}
+                    className="rounded-md p-1.5 text-rose-400/70 hover:bg-rose-500/10"
+                  >
                     <Trash size={16} />
-                  </button>
+                  </span>
                 </div>
               </div>
               {d.description && <p className="text-sm text-glow-100/60">{d.description}</p>}
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -103,6 +130,36 @@ export function Departments() {
             {saveMutation.isPending ? "Saving…" : "Save department"}
           </button>
         </form>
+      </SlideOver>
+
+      <SlideOver
+        open={viewingDept !== null}
+        title={viewingDept ? `${viewingDept.name} members` : "Members"}
+        onClose={() => setViewingDept(null)}
+      >
+        {membersQuery.isLoading ? (
+          <p className="text-sm text-glow-100/50">Loading…</p>
+        ) : !membersQuery.data?.length ? (
+          <p className="flex items-center gap-2 text-sm text-glow-100/50">
+            <UsersThree size={18} /> No one is assigned to this department yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {membersQuery.data.map((u) => (
+              <div key={u.id} className="flex items-center justify-between rounded-lg border border-ink-700 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-glow-100">{u.fullName}</p>
+                  <p className="text-xs text-glow-100/50">
+                    {u.jobTitle ?? u.role} · {u.email}
+                  </p>
+                </div>
+                <span className={`tag ${u.active ? "border border-glow-500/30 bg-glow-500/15 text-glow-300" : "border border-rose-500/30 bg-rose-500/15 text-rose-400"}`}>
+                  {u.active ? "Active" : "Inactive"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </SlideOver>
     </div>
   );
