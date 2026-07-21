@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #06120f;
+  --color-ink-900: #0a1a16;
+  --color-ink-800: #0f241f;
+  --color-ink-700: #16332c;
+  --color-ink-600: #1f463c;
+  --color-ink-500: #2c5c4e;
+  --color-glow-500: #2dd4a7;
+  --color-glow-400: #5ce6c1;
+  --color-glow-300: #97f2d8;
+  --color-amber-500: #f5a524;
+  --color-amber-400: #ffbf4d;
+  --color-rose-500: #f45b69;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--color-ink-950);
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: var(--color-ink-950);
+    color: #d7f3ea;
+    min-height: 100vh;
+  }
+  ::selection {
+    background: var(--color-glow-500);
+    color: #06120f;
+  }
+  * {
+    scrollbar-color: var(--color-ink-500) transparent;
+    scrollbar-width: thin;
+  }
+}
+
+@layer components {
+  .panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+    background-color: #0f241f;
+    border: 1px solid #1f463c;
+    border-radius: 0.9rem;
+  }
+  .btn-glow {
+    background: var(--color-glow-500);
+    color: #06120f;
+    font-weight: 600;
+    border-radius: 0.6rem;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  .btn-glow:hover {
+    filter: brightness(1.1);
+  }
+  .btn-glow:active {
+    transform: scale(0.98);
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid #1f463c;
+    color: #97f2d8;
+    border-radius: 0.6rem;
+  }
+  .btn-ghost:hover {
+    background: #16332c;
+  }
+  .field {
+    background: #06120f;
+    border: 1px solid #1f463c;
+    border-radius: 0.55rem;
+    color: #d7f3ea;
+    padding: 0.55rem 0.75rem;
+  }
+  .field:focus {
+    outline: none;
+    border-color: #2dd4a7;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+}
